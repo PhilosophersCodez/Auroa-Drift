@@ -1,6 +1,8 @@
 # Auroa-Drift
 Aurora Drift is a fast-paced, neon-lit space survival game built with HTML, CSS, and JavaScript.
 
+🎮 **Play Aurora Drift Online:** [Launch Game](https://philosopherscodez.github.io/Auroa-Drift/)
+
 🛸 Aurora Drift – A Space Survival Arcade Game
 Aurora Drift is a fast-paced, neon-lit space survival game built with HTML, CSS, and JavaScript. Players pilot a glowing ship through an asteroid field, dodging threats, collecting power-ups, and unlocking upgrades at a futuristic station. With smooth controls, dynamic visuals, and a growing list of features, this game blends classic arcade reflexes with modern design.
 
