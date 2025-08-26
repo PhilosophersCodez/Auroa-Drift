@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Aurora Drift</title>
+<title>Aurora Drift - Fixed</title>
 <style>
   /* Reset & base */
   * {
@@ -46,6 +46,7 @@
       0 0 6px #0ff,
       0 0 20px #0ff,
       0 0 30px #0ff;
+    z-index: 10;
   }
   #start-screen h1, #gameover-screen h1 {
     font-size: 4vw;
@@ -73,6 +74,295 @@
     outline: none;
   }
 
+  /* Power-up activation animations */
+  .shield-activation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    animation: shieldPulse 2s ease-out;
+  }
+  
+  .mega-boost-activation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    font-weight: bold;
+    color: #0f0;
+    text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    animation: megaBoostPulse 2.5s ease-out;
+  }
+  
+  .super-mega-ultra-boost {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4.5rem;
+    font-weight: bold;
+    color: #0f0;
+    text-shadow: 
+      0 0 10px #0f0, 
+      0 0 20px #0f0, 
+      0 0 30px #0f0,
+      0 0 40px #0ff,
+      0 0 70px #0ff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 15;
+    animation: superMegaUltraBoost 4s ease-out;
+    text-align: center;
+  }
+  
+  @keyframes shieldPulse {
+    0% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+    30% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+    70% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1);
+    }
+    100% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+  }
+  
+  @keyframes megaBoostPulse {
+    0% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(0.3);
+      color: #0ff;
+    }
+    20% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.5);
+      color: #0f0;
+    }
+    40% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.2);
+      color: #0f0;
+    }
+    60% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.4);
+      color: #0f0;
+    }
+    80% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1);
+      color: #0f0;
+    }
+    100% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(0.5);
+      color: #0f0;
+    }
+  }
+  
+  @keyframes superMegaUltraBoost {
+    0% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(0.1);
+      color: #0ff;
+    }
+    15% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.5);
+      color: #0f0;
+    }
+    30% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.2);
+      color: #0f0;
+    }
+    45% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1.4);
+      color: #0f0;
+    }
+    60% { 
+      opacity: 1; 
+      transform: translate(-50%, -50%) scale(1);
+      color: #0f0;
+    }
+    70% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1);
+      color: #0ff;
+    }
+    80% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      color: #0f0;
+    }
+    90% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.05);
+      color: #0ff;
+    }
+    100% { 
+      opacity: 0; 
+      transform: translate(-50%, -50%) scale(1.5);
+      color: #0f0;
+    }
+  }
+
+  /* UI Elements */
+  #game-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  /* Score and stats on the left */
+  #score-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    text-align: left;
+  }
+  
+  #score, #high-score {
+    font-size: 18px;
+    color: #0ff;
+    text-shadow: 0 0 5px #0ff;
+    margin-bottom: 5px;
+  }
+  
+  /* Power-up timers on the right */
+  #powerup-timers {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+  }
+  
+  .powerup-timer {
+    font-size: 16px;
+    margin-bottom: 8px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .powerup-timer.active {
+    opacity: 1;
+  }
+  
+  #shield-timer {
+    color: #0ff;
+    text-shadow: 0 0 5px #0ff;
+    border: 1px solid #0ff;
+  }
+  
+  #speed-timer {
+    color: #0f0;
+    text-shadow: 0 0 5px #0f0;
+    border: 1px solid #0f0;
+  }
+  
+  #super-boost-timer {
+    color: #0f0;
+    text-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+    border: 1px solid #0f0;
+    font-weight: bold;
+    animation: pulse 1s infinite alternate;
+  }
+  
+  @keyframes pulse {
+    from { opacity: 0.7; text-shadow: 0 0 5px #0f0, 0 0 10px #0f0; }
+    to { opacity: 1; text-shadow: 0 0 10px #0f0, 0 0 20px #0f0; }
+  }
+  
+  /* Instructions at the bottom */
+  #instructions {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 16px;
+    color: #0ff;
+    text-shadow: 0 0 5px #0ff;
+  }
+
+  /* Performance stats */
+  #performance-stats {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: #0ff;
+    font-size: 12px;
+    text-align: right;
+    opacity: 0.7;
+  }
+
+  /* Death cinematic overlay */
+  #death-cinematic {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 8;
+    transition: opacity 2s ease;
+  }
+  
+  #death-cinematic.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  #death-message {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    color: #f00;
+    text-shadow: 0 0 10px #f00, 0 0 20px #f00;
+    opacity: 0;
+    text-align: center;
+  }
+  
+  #death-message.active {
+    animation: fadeInOut 4s ease-in-out;
+  }
+  
+  @keyframes fadeInOut {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
   /* Responsive font sizes */
   @media(max-width: 600px) {
     #start-screen h1, #gameover-screen h1 {
@@ -85,23 +375,66 @@
       font-size: 5vw;
       padding: 0.8em 3em;
     }
+    .shield-activation, .mega-boost-activation {
+      font-size: 2rem;
+    }
+    .super-mega-ultra-boost {
+      font-size: 2.2rem;
+    }
+    #score, #high-score {
+      font-size: 14px;
+    }
+    .powerup-timer {
+      font-size: 12px;
+    }
+    #instructions {
+      font-size: 12px;
+    }
+    #death-message {
+      font-size: 1.8rem;
+    }
   }
 </style>
 </head>
 <body>
 <div id="game-container">
   <canvas id="game-canvas"></canvas>
+  
+  <div id="game-ui">
+    <div id="score-container">
+      <div id="score">SCORE: 0</div>
+      <div id="high-score">HIGH SCORE: 0</div>
+    </div>
+    
+    <div id="powerup-timers">
+      <div id="shield-timer" class="powerup-timer">SHIELD: 0s</div>
+      <div id="speed-timer" class="powerup-timer">BOOST: 0s</div>
+      <div id="super-boost-timer" class="powerup-timer">SUPER BOOST: 0s</div>
+    </div>
+    
+    <div id="instructions">
+      USE WASD TO MOVE • PRESS SPACE TO SHOOT • COLLECT POWER-UPS FOR SPECIAL ABILITIES
+    </div>
+    
+    <div id="performance-stats">
+      <div>FPS: <span id="fps-counter">0</span></div>
+      <div>ASTEROIDS: <span id="asteroid-count">0</span></div>
+    </div>
+  </div>
+  
+  <div id="death-cinematic"></div>
+  <div id="death-message">CRITICAL DAMAGE<br><span style="font-size: 1.5rem;">ESCAPE POD ACTIVATED</span></div>
 
   <div id="start-screen">
-    <h1>Aurora Drift</h1>
-    <p>Use WASD to pilot your glowing ship.<br>Survive as long as you can against asteroids & enemies.</p>
-    <button id="start-btn">START</button>
+    <h1>AURORA DRIFT</h1>
+    <p>Navigate through asteroid fields and enemy ships<br>Collect power-ups for special abilities<br>Press SPACE to shoot enemies<br><br>SECRET: Collect both Shield and Boost for SUPER MEGA ULTRA BOOST!</p>
+    <button id="start-btn">START MISSION</button>
   </div>
 
   <div id="gameover-screen" style="display:none;">
-    <h1>GAME OVER</h1>
+    <h1>MISSION FAILED</h1>
     <p id="final-score"></p>
-    <button id="restart-btn">RESTART</button>
+    <button id="restart-btn">RESTART MISSION</button>
   </div>
 </div>
 
@@ -125,10 +458,40 @@
   }
 
   // === GLOBALS ===
-  const keys = { w:false, a:false, s:false, d:false };
-  let gameState = 'start'; // 'start', 'playing', 'gameover'
+  const keys = { w:false, a:false, s:false, d:false, space:false };
+  let gameState = 'start'; // 'start', 'playing', 'gameover', 'death-cinematic'
   let score = 0;
   let highScore = 0;
+  let lastTime = 0;
+  let animationId = null;
+  let ship = null;
+  let asteroids = [];
+  let enemies = [];
+  let powerUps = [];
+  let particles = [];
+  let debris = [];
+  let bullets = [];
+  let spawnTimer = 0;
+  let enemySpawnTimer = 0;
+  let powerUpTimer = 0;
+  let scoreTimer = 0;
+  let frameCount = 0;
+  let lastFpsUpdate = 0;
+  let currentFps = 0;
+  let gameSpeedMultiplier = 1;
+  let cinematicCameraX = 0;
+  let cinematicCameraY = 0;
+  let cinematicZoom = 1;
+  let shootCooldown = 0;
+  let hasShield = false;
+  let hasSpeedBoost = false;
+  let isSuperBoostActive = false;
+
+  // Performance settings
+  const MAX_ASTEROIDS = 30;
+  const MAX_PARTICLES = 100;
+  const MAX_DEBRIS = 50;
+  const MAX_BULLETS = 20;
 
   // === RESIZE ===
   function resize() {
@@ -159,7 +522,7 @@
       this.twinklePhase = Math.random() * Math.PI * 2;
     }
     update() {
-      this.x -= this.speed;
+      this.x -= this.speed * gameSpeedMultiplier;
       if (this.x < 0) this.x = W;
       this.twinklePhase += this.twinkleSpeed;
       this.brightness = 0.5 + 0.5 * Math.sin(this.twinklePhase);
@@ -196,8 +559,8 @@
       this.maxLife = life;
     }
     update() {
-      this.x += this.dx;
-      this.y += this.dy;
+      this.x += this.dx * gameSpeedMultiplier;
+      this.y += this.dy * gameSpeedMultiplier;
       this.life--;
       this.radius *= 0.95;
     }
@@ -218,6 +581,111 @@
     }
   }
 
+  // === BULLET CLASS ===
+  class Bullet {
+    constructor(x, y, angle) {
+      this.x = x;
+      this.y = y;
+      this.speed = 12;
+      this.angle = angle;
+      this.radius = 3;
+      this.color = '#0ff';
+      this.life = 60; // Frames bullet exists
+    }
+    
+    update() {
+      this.x += Math.cos(this.angle) * this.speed * gameSpeedMultiplier;
+      this.y += Math.sin(this.angle) * this.speed * gameSpeedMultiplier;
+      this.life--;
+    }
+    
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 15;
+      
+      // Draw bullet
+      ctx.beginPath();
+      ctx.moveTo(0, -this.radius);
+      ctx.lineTo(this.radius * 2, 0);
+      ctx.lineTo(0, this.radius);
+      ctx.lineTo(-this.radius * 2, 0);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Draw trail
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-this.radius * 4, 0);
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      ctx.restore();
+      ctx.shadowBlur = 0;
+    }
+    
+    get alive() {
+      return this.life > 0 && 
+             this.x > 0 && this.x < W && 
+             this.y > 0 && this.y < H;
+    }
+  }
+
+  // === ASTEROID DEBRIS ===
+  class Debris {
+    constructor(x, y, size, color) {
+      this.x = x;
+      this.y = y;
+      this.size = size;
+      this.color = color;
+      this.speedX = randomRange(-2, 2);
+      this.speedY = randomRange(1, 3); // Falling downward
+      this.rotation = randomRange(0, Math.PI * 2);
+      this.rotationSpeed = randomRange(-0.05, 0.05);
+      this.life = 120; // Frames until removal
+    }
+    
+    update() {
+      this.x += this.speedX * gameSpeedMultiplier;
+      this.y += this.speedY * gameSpeedMultiplier;
+      this.rotation += this.rotationSpeed;
+      this.life--;
+    }
+    
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 10;
+      
+      // Draw rock-like shape
+      ctx.beginPath();
+      ctx.moveTo(0, -this.size);
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const dist = this.size * randomRange(0.7, 1.3);
+        ctx.lineTo(Math.cos(angle) * dist, Math.sin(angle) * dist);
+      }
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.restore();
+      ctx.shadowBlur = 0;
+    }
+    
+    get alive() {
+      return this.life > 0 && this.y < H + 50;
+    }
+  }
+
   // === SPACESHIP ===
   class Ship {
     constructor() {
@@ -233,15 +701,48 @@
       this.glowColor = 'cyan';
       this.trail = [];
       this.trailMax = 15;
-      this.shield = 0; // frames of shield active
+      this.shield = 0; // frames of shield active (10 seconds at 60fps = 600 frames)
       this.speedBoost = 0; // frames of speed boost active
+      this.superMegaUltraBoost = 0; // frames of super boost active
+      this.originalRadius = 18;
     }
     update() {
+      // Apply super mega ultra boost effects if active
+      let sizeMultiplier = 1;
+      let trailColor = this.glowColor;
+      
+      if (this.superMegaUltraBoost > 0) {
+        sizeMultiplier = 1.8;
+        trailColor = '#0ff'; // Cyan-green mix
+        this.superMegaUltraBoost--;
+        document.getElementById('super-boost-timer').textContent = `SUPER BOOST: ${Math.ceil(this.superMegaUltraBoost / 60)}s`;
+        
+        // Create constant super boost particles
+        for (let i = 0; i < 3; i++) {
+          const angle = Math.atan2(this.velY, this.velX) + Math.PI + randomRange(-0.3, 0.3);
+          const speed = randomRange(2, 5);
+          particles.push(new Particle(
+            this.x, 
+            this.y, 
+            Math.cos(angle) * speed,
+            Math.sin(angle) * speed,
+            randomRange(2, 4),
+            '#0ff',
+            randomRange(10, 20)
+          ));
+        }
+      } else if (this.superMegaUltraBoost <= 0 && isSuperBoostActive) {
+        // Super boost just ended
+        isSuperBoostActive = false;
+        gameSpeedMultiplier = 1;
+        document.getElementById('super-boost-timer').classList.remove('active');
+      }
+      
       // Movement input
-      if (keys.w) this.velY -= this.acceleration;
-      if (keys.s) this.velY += this.acceleration;
-      if (keys.a) this.velX -= this.acceleration;
-      if (keys.d) this.velX += this.acceleration;
+      if (keys.w) this.velY -= this.acceleration * gameSpeedMultiplier;
+      if (keys.s) this.velY += this.acceleration * gameSpeedMultiplier;
+      if (keys.a) this.velX -= this.acceleration * gameSpeedMultiplier;
+      if (keys.d) this.velX += this.acceleration * gameSpeedMultiplier;
 
       // Clamp speed and apply friction
       this.velX = lerp(this.velX, 0, this.friction);
@@ -252,6 +753,17 @@
       if(this.speedBoost > 0) {
         maxSpd = this.maxSpeed * 1.8;
         this.speedBoost--;
+        
+        // Update speed timer display
+        document.getElementById('speed-timer').textContent = `BOOST: ${Math.ceil(this.speedBoost / 60)}s`;
+      } else {
+        document.getElementById('speed-timer').classList.remove('active');
+        hasSpeedBoost = false;
+      }
+
+      // Super mega ultra boost speed
+      if (this.superMegaUltraBoost > 0) {
+        maxSpd = this.maxSpeed * 2.5;
       }
 
       // Clamp velocity
@@ -259,30 +771,47 @@
       this.velY = Math.max(-maxSpd, Math.min(maxSpd, this.velY));
 
       // Update position
-      this.x += this.velX;
-      this.y += this.velY;
+      this.x += this.velX * gameSpeedMultiplier;
+      this.y += this.velY * gameSpeedMultiplier;
 
       // Clamp position inside screen
-      this.x = Math.min(Math.max(this.radius, this.x), W - this.radius);
-      this.y = Math.min(Math.max(this.radius, this.y), H - this.radius);
+      this.x = Math.min(Math.max(this.radius * sizeMultiplier, this.x), W - this.radius * sizeMultiplier);
+      this.y = Math.min(Math.max(this.radius * sizeMultiplier, this.y), H - this.radius * sizeMultiplier);
 
       // Trail particles
-      this.trail.push({x: this.x, y: this.y});
+      this.trail.push({x: this.x, y: this.y, color: trailColor});
       if(this.trail.length > this.trailMax) this.trail.shift();
 
       // Shield countdown
-      if(this.shield > 0) this.shield--;
+      if(this.shield > 0) {
+        this.shield--;
+        // Update shield timer display
+        document.getElementById('shield-timer').textContent = `SHIELD: ${Math.ceil(this.shield / 60)}s`;
+      } else {
+        document.getElementById('shield-timer').classList.remove('active');
+        hasShield = false;
+      }
+      
+      // Check for super mega ultra boost activation
+      if (hasShield && hasSpeedBoost && this.superMegaUltraBoost <= 0 && !isSuperBoostActive) {
+        this.activateSuperMegaUltraBoost();
+      }
     }
     draw() {
+      // Apply size multiplier for super boost
+      const sizeMultiplier = this.superMegaUltraBoost > 0 ? 1.8 : 1;
+      
       // Draw glowing trail
       for(let i=0; i < this.trail.length; i++) {
         const pos = this.trail[i];
         const alpha = i / this.trail.length;
-        ctx.shadowColor = this.glowColor;
-        ctx.shadowBlur = 20 * alpha;
-        ctx.fillStyle = `rgba(0,255,255,${alpha * 0.3})`;
+        ctx.shadowColor = pos.color;
+        ctx.shadowBlur = 20 * alpha * sizeMultiplier;
+        ctx.fillStyle = this.superMegaUltraBoost > 0 ? 
+          `rgba(0,255,255,${alpha * 0.5})` : 
+          `rgba(0,255,255,${alpha * 0.3})`;
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 12 * alpha, 0, Math.PI*2);
+        ctx.arc(pos.x, pos.y, 12 * alpha * sizeMultiplier, 0, Math.PI*2);
         ctx.fill();
       }
       ctx.shadowBlur = 0;
@@ -297,34 +826,151 @@
 
       // Neon glow
       ctx.shadowColor = this.glowColor;
-      ctx.shadowBlur = 25;
+      ctx.shadowBlur = 25 * sizeMultiplier;
       ctx.strokeStyle = this.glowColor;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3 * sizeMultiplier;
 
       // Draw ship shape
       ctx.beginPath();
-      ctx.moveTo(0, -this.radius);
-      ctx.lineTo(this.radius * 0.7, this.radius);
-      ctx.lineTo(0, this.radius * 0.4);
-      ctx.lineTo(-this.radius * 0.7, this.radius);
+      ctx.moveTo(0, -this.radius * sizeMultiplier);
+      ctx.lineTo(this.radius * 0.7 * sizeMultiplier, this.radius * sizeMultiplier);
+      ctx.lineTo(0, this.radius * 0.4 * sizeMultiplier);
+      ctx.lineTo(-this.radius * 0.7 * sizeMultiplier, this.radius * sizeMultiplier);
       ctx.closePath();
 
-      ctx.fillStyle = 'rgba(0,255,255,0.9)';
+      ctx.fillStyle = this.superMegaUltraBoost > 0 ? 'rgba(0,255,255,0.95)' : 'rgba(0,255,255,0.9)';
       ctx.fill();
       ctx.stroke();
 
       // Shield ring
-      if(this.shield > 0) {
+      if(this.shield > 0 || this.superMegaUltraBoost > 0) {
         const shieldAlpha = 0.6 + 0.4 * Math.sin(Date.now() / 100);
-        ctx.strokeStyle = `rgba(0,255,255,${shieldAlpha.toFixed(2)})`;
-        ctx.lineWidth = 5;
+        ctx.strokeStyle = this.superMegaUltraBoost > 0 ? 
+          `rgba(0,255,255,${shieldAlpha.toFixed(2)})` : 
+          `rgba(0,255,255,${shieldAlpha.toFixed(2)})`;
+        ctx.lineWidth = 5 * sizeMultiplier;
         ctx.beginPath();
-        ctx.arc(0, 0, this.radius + 8, 0, Math.PI * 2);
+        ctx.arc(0, 0, (this.radius + 8) * sizeMultiplier, 0, Math.PI * 2);
         ctx.stroke();
       }
 
       ctx.restore();
       ctx.shadowBlur = 0;
+    }
+    
+    activateShield() {
+      this.shield = 600; // 10 seconds at 60fps
+      hasShield = true;
+      document.getElementById('shield-timer').classList.add('active');
+      document.getElementById('shield-timer').textContent = `SHIELD: ${Math.ceil(this.shield / 60)}s`;
+      
+      // Create shield activation animation
+      const shieldActivation = document.createElement('div');
+      shieldActivation.className = 'shield-activation';
+      shieldActivation.textContent = 'SHIELD ACTIVATED!';
+      document.getElementById('game-container').appendChild(shieldActivation);
+      
+      // Remove animation after it completes
+      setTimeout(() => {
+        if (document.getElementById('game-container').contains(shieldActivation)) {
+          document.getElementById('game-container').removeChild(shieldActivation);
+        }
+      }, 2000);
+    }
+    
+    activateMegaBoost() {
+      this.speedBoost = 300; // 5 seconds at 60fps
+      hasSpeedBoost = true;
+      document.getElementById('speed-timer').classList.add('active');
+      document.getElementById('speed-timer').textContent = `BOOST: ${Math.ceil(this.speedBoost / 60)}s`;
+      
+      // Increase game speed for challenge
+      if (!isSuperBoostActive) {
+        gameSpeedMultiplier = 1.5;
+      }
+      
+      // Create mega boost activation animation
+      const megaBoostActivation = document.createElement('div');
+      megaBoostActivation.className = 'mega-boost-activation';
+      megaBoostActivation.textContent = 'MEGA BOOST!';
+      document.getElementById('game-container').appendChild(megaBoostActivation);
+      
+      // Remove animation after it completes
+      setTimeout(() => {
+        if (document.getElementById('game-container').contains(megaBoostActivation)) {
+          document.getElementById('game-container').removeChild(megaBoostActivation);
+        }
+        // Reset game speed after boost ends if not in super boost
+        setTimeout(() => {
+          if (this.speedBoost <= 0 && !isSuperBoostActive) {
+            gameSpeedMultiplier = 1;
+          }
+        }, 1000);
+      }, 2500);
+    }
+    
+    activateSuperMegaUltraBoost() {
+      this.superMegaUltraBoost = 1800; // 30 seconds at 60fps
+      this.shield = this.superMegaUltraBoost; // Shield lasts for super boost duration
+      this.speedBoost = 0; // Reset regular boost
+      hasSpeedBoost = false;
+      hasShield = true;
+      isSuperBoostActive = true;
+      
+      gameSpeedMultiplier = 2.0; // Even faster game speed
+      document.getElementById('super-boost-timer').classList.add('active');
+      document.getElementById('super-boost-timer').textContent = `SUPER BOOST: ${Math.ceil(this.superMegaUltraBoost / 60)}s`;
+      document.getElementById('speed-timer').classList.remove('active');
+      
+      // Create super mega ultra boost activation animation
+      const superBoostActivation = document.createElement('div');
+      superBoostActivation.className = 'super-mega-ultra-boost';
+      superBoostActivation.innerHTML = 'YOU\'VE UNLOCKED<br>SUPER MEGA ULTRA BOOST!';
+      document.getElementById('game-container').appendChild(superBoostActivation);
+      
+      // Create massive explosion effect
+      for (let i = 0; i < 150; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = randomRange(5, 20);
+        particles.push(new Particle(
+          this.x, this.y,
+          Math.cos(angle) * speed,
+          Math.sin(angle) * speed,
+          randomRange(2, 6),
+          '#0ff',
+          randomRange(40, 100)
+        ));
+      }
+      
+      // Remove animation after it completes
+      setTimeout(() => {
+        if (document.getElementById('game-container').contains(superBoostActivation)) {
+          document.getElementById('game-container').removeChild(superBoostActivation);
+        }
+      }, 4000);
+    }
+    
+    shoot() {
+      if (shootCooldown <= 0 && bullets.length < MAX_BULLETS) {
+        const angle = Math.atan2(this.velY, this.velX) + Math.PI / 2;
+        bullets.push(new Bullet(this.x, this.y, angle));
+        shootCooldown = 10; // Cooldown between shots
+        
+        // Create shooting particles
+        for (let i = 0; i < 5; i++) {
+          const particleAngle = angle + Math.PI + randomRange(-0.5, 0.5);
+          const speed = randomRange(1, 3);
+          particles.push(new Particle(
+            this.x, 
+            this.y, 
+            Math.cos(particleAngle) * speed,
+            Math.sin(particleAngle) * speed,
+            randomRange(1, 2),
+            '#0ff',
+            randomRange(10, 20)
+          ));
+        }
+      }
     }
   }
 
@@ -334,7 +980,7 @@
       this.radius = randomRange(15, 40);
       this.x = Math.random() < 0.5 ? -this.radius - 10 : W + this.radius + 10;
       this.y = randomRange(0, H);
-      this.speed = randomRange(1, 3);
+      this.speed = randomRange(1, 3) * gameSpeedMultiplier;
       this.angle = 0;
       this.rotationSpeed = randomRange(-0.02, 0.02);
       this.vertices = [];
@@ -385,6 +1031,21 @@
         this.y > H + this.radius*2
       );
     }
+    
+    createDebris() {
+      // Create multiple debris pieces
+      const debrisCount = Math.floor(this.radius / 3);
+      for (let i = 0; i < debrisCount; i++) {
+        if (debris.length < MAX_DEBRIS) {
+          debris.push(new Debris(
+            this.x + randomRange(-10, 10),
+            this.y + randomRange(-10, 10),
+            randomRange(3, this.radius / 3),
+            this.color
+          ));
+        }
+      }
+    }
   }
 
   // === ENEMY SHIP ===
@@ -393,8 +1054,9 @@
       this.radius = 20;
       this.x = Math.random() < 0.5 ? -50 : W + 50;
       this.y = randomRange(0, H);
-      this.speed = randomRange(2, 4);
-      this.color = 'magenta';
+      this.speed = randomRange(2, 4) * gameSpeedMultiplier;
+      this.color = 'red';
+      this.health = 2;
       // Direction toward player start center
       const toCenterX = W/2 - this.x;
       const toCenterY = H/2 - this.y;
@@ -437,7 +1099,7 @@
       ctx.lineTo(-this.radius * 0.7, -this.radius);
       ctx.closePath();
 
-      ctx.fillStyle = 'rgba(255, 0, 255, 0.9)';
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
       ctx.fill();
       ctx.stroke();
 
@@ -493,4 +1155,424 @@
         ctx.beginPath();
         ctx.moveTo(0, -7 * pulse);
         ctx.lineTo(5 * pulse, -3 * pulse);
-        ctx.lineTo(5 * pulse, 4
+        ctx.lineTo(5 * pulse, 4 * pulse);
+        ctx.arc(0, 4 * pulse, 5 * pulse, 0, Math.PI);
+        ctx.lineTo(-5 * pulse, -3 * pulse);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        // Speed icon: lightning bolt
+        ctx.beginPath();
+        ctx.moveTo(0, -6 * pulse);
+        ctx.lineTo(4 * pulse, -2 * pulse);
+        ctx.lineTo(-2 * pulse, -2 * pulse);
+        ctx.lineTo(0, 6 * pulse);
+        ctx.lineTo(-4 * pulse, 2 * pulse);
+        ctx.lineTo(2 * pulse, 2 * pulse);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+  }
+
+  // === GAME FUNCTIONS ===
+  function startGame() {
+    gameState = 'playing';
+    score = 0;
+    ship = new Ship();
+    asteroids = [];
+    enemies = [];
+    powerUps = [];
+    particles = [];
+    debris = [];
+    bullets = [];
+    spawnTimer = 0;
+    enemySpawnTimer = 0;
+    powerUpTimer = 0;
+    scoreTimer = 0;
+    gameSpeedMultiplier = 1;
+    cinematicCameraX = 0;
+    cinematicCameraY = 0;
+    cinematicZoom = 1;
+    hasShield = false;
+    hasSpeedBoost = false;
+    isSuperBoostActive = false;
+    
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('gameover-screen').style.display = 'none';
+    document.getElementById('shield-timer').classList.remove('active');
+    document.getElementById('speed-timer').classList.remove('active');
+    document.getElementById('super-boost-timer').classList.remove('active');
+    document.getElementById('death-cinematic').classList.remove('active');
+    document.getElementById('death-message').classList.remove('active');
+    
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
+    lastTime = performance.now();
+    animationId = requestAnimationFrame(gameLoop);
+  }
+
+  function playDeathCinematic() {
+    gameState = 'death-cinematic';
+    document.getElementById('death-cinematic').classList.add('active');
+    document.getElementById('death-message').classList.add('active');
+    
+    // Set up cinematic camera
+    cinematicCameraX = ship.x;
+    cinematicCameraY = ship.y;
+    cinematicZoom = 1;
+    
+    // Continue the cinematic for 4 seconds before showing game over
+    setTimeout(() => {
+      document.getElementById('death-cinematic').classList.remove('active');
+      document.getElementById('death-message').classList.remove('active');
+      gameOver();
+    }, 4000);
+  }
+
+  function gameOver() {
+    gameState = 'gameover';
+    document.getElementById('final-score').textContent = `FINAL SCORE: ${score} | HIGH SCORE: ${Math.max(score, highScore)}`;
+    document.getElementById('gameover-screen').style.display = 'block';
+    highScore = Math.max(score, highScore);
+  }
+
+  function spawnAsteroid() {
+    // Don't spawn if we've reached the maximum
+    if (asteroids.length >= MAX_ASTEROIDS) return;
+    
+    asteroids.push(new Asteroid());
+  }
+
+  function spawnEnemy() {
+    enemies.push(new EnemyShip());
+  }
+
+  function spawnPowerUp() {
+    const type = Math.random() < 0.5 ? 'shield' : 'speed';
+    powerUps.push(new PowerUp(type));
+  }
+
+  function createExplosion(x, y, color, count, size) {
+    // Don't create too many particles
+    if (particles.length > MAX_PARTICLES) return;
+    
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = randomRange(1, 3);
+      const dx = Math.cos(angle) * speed;
+      const dy = Math.sin(angle) * speed;
+      particles.push(new Particle(x, y, dx, dy, randomRange(size/2, size), color, randomRange(30, 60)));
+    }
+  }
+
+  function checkCollisions() {
+    // Check asteroid collisions with player
+    for (let i = asteroids.length - 1; i >= 0; i--) {
+      const asteroid = asteroids[i];
+      if (distance(ship.x, ship.y, asteroid.x, asteroid.y) < ship.radius + asteroid.radius) {
+        if (ship.shield > 0 || ship.superMegaUltraBoost > 0) {
+          // Create asteroid debris when destroyed by shield
+          asteroid.createDebris();
+          createExplosion(asteroid.x, asteroid.y, 'cyan', 15, asteroid.radius/2);
+          asteroids.splice(i, 1);
+          score += ship.superMegaUltraBoost > 0 ? 10 : 5; // Double points during super boost
+        } else {
+          createExplosion(ship.x, ship.y, 'cyan', 30, 4);
+          createExplosion(asteroid.x, asteroid.y, asteroid.color, 20, asteroid.radius/2);
+          // Create asteroid debris
+          asteroid.createDebris();
+          asteroids.splice(i, 1);
+          playDeathCinematic();
+          return;
+        }
+      }
+      
+      // Check asteroid collisions with bullets
+      for (let j = bullets.length - 1; j >= 0; j--) {
+        const bullet = bullets[j];
+        if (distance(bullet.x, bullet.y, asteroid.x, asteroid.y) < asteroid.radius) {
+          asteroid.createDebris();
+          createExplosion(asteroid.x, asteroid.y, asteroid.color, 10, asteroid.radius/2);
+          asteroids.splice(i, 1);
+          bullets.splice(j, 1);
+          score += ship.superMegaUltraBoost > 0 ? 6 : 3; // Double points during super boost
+          break;
+        }
+      }
+    }
+
+    // Check enemy collisions with player
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const enemy = enemies[i];
+      if (distance(ship.x, ship.y, enemy.x, enemy.y) < ship.radius + enemy.radius) {
+        if (ship.shield > 0 || ship.superMegaUltraBoost > 0) {
+          createExplosion(enemy.x, enemy.y, enemy.color, 20, 4);
+          enemies.splice(i, 1);
+          score += ship.superMegaUltraBoost > 0 ? 20 : 10; // Double points during super boost
+        } else {
+          createExplosion(ship.x, ship.y, 'cyan', 30, 4);
+          createExplosion(enemy.x, enemy.y, enemy.color, 20, 4);
+          enemies.splice(i, 1);
+          playDeathCinematic();
+          return;
+        }
+      }
+      
+      // Check enemy collisions with bullets
+      for (let j = bullets.length - 1; j >= 0; j--) {
+        const bullet = bullets[j];
+        if (distance(bullet.x, bullet.y, enemy.x, enemy.y) < enemy.radius + bullet.radius) {
+          enemy.health--;
+          createExplosion(enemy.x, enemy.y, enemy.color, 5, 2);
+          bullets.splice(j, 1);
+          
+          if (enemy.health <= 0) {
+            createExplosion(enemy.x, enemy.y, enemy.color, 15, 4);
+            enemies.splice(i, 1);
+            score += ship.superMegaUltraBoost > 0 ? 16 : 8; // Double points during super boost
+          }
+          break;
+        }
+      }
+    }
+
+    // Check power-up collisions
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+      const powerUp = powerUps[i];
+      if (distance(ship.x, ship.y, powerUp.x, powerUp.y) < ship.radius + powerUp.radius) {
+        if (powerUp.type === 'shield') {
+          ship.activateShield();
+        } else {
+          ship.activateMegaBoost();
+        }
+        createExplosion(powerUp.x, powerUp.y, powerUp.color, 15, 3);
+        powerUps.splice(i, 1);
+        score += ship.superMegaUltraBoost > 0 ? 4 : 2; // Double points during super boost
+      }
+    }
+  }
+
+  function updateGameObjects(deltaTime) {
+    // Update stars
+    stars.forEach(star => star.update());
+    
+    // Update particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      particles[i].update();
+      if (!particles[i].alive) {
+        particles.splice(i, 1);
+      }
+    }
+    
+    // Update debris
+    for (let i = debris.length - 1; i >= 0; i--) {
+      debris[i].update();
+      if (!debris[i].alive) {
+        debris.splice(i, 1);
+      }
+    }
+    
+    // Update bullets
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      bullets[i].update();
+      if (!bullets[i].alive) {
+        bullets.splice(i, 1);
+      }
+    }
+    
+    // Handle shoot cooldown
+    if (shootCooldown > 0) {
+      shootCooldown--;
+    }
+    
+    if (gameState !== 'playing') return;
+    
+    // Update ship
+    ship.update();
+    
+    // Update asteroids
+    for (let i = asteroids.length - 1; i >= 0; i--) {
+      asteroids[i].update();
+      if (asteroids[i].isOffscreen()) {
+        asteroids.splice(i, 1);
+      }
+    }
+    
+    // Update enemies
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      enemies[i].update(ship);
+      if (enemies[i].isOffscreen()) {
+        enemies.splice(i, 1);
+      }
+    }
+    
+    // Update power-ups
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+      powerUps[i].update();
+      if (powerUps[i].lifeTime <= 0) {
+        powerUps.splice(i, 1);
+      }
+    }
+    
+    // Spawn new asteroids
+    spawnTimer += deltaTime;
+    let asteroidSpawnRate = 60;
+    
+    if (spawnTimer > asteroidSpawnRate && asteroids.length < MAX_ASTEROIDS) {
+      spawnTimer = 0;
+      spawnAsteroid();
+      
+      let extraChance = 0.7 - (score / 2000);
+      extraChance = Math.max(0.2, extraChance);
+      
+      if (Math.random() < extraChance && asteroids.length < MAX_ASTEROIDS - 2) {
+        spawnAsteroid();
+      }
+    }
+    
+    // Spawn new enemies
+    enemySpawnTimer += deltaTime;
+    if (enemySpawnTimer > 120) {
+      enemySpawnTimer = 0;
+      if (Math.random() < 0.7) {
+        spawnEnemy();
+      }
+    }
+    
+    // Spawn power-ups occasionally
+    powerUpTimer += deltaTime;
+    if (powerUpTimer > 600 && powerUps.length < 3 && Math.random() < 0.1) {
+      powerUpTimer = 0;
+      spawnPowerUp();
+    }
+    
+    // Increment score over time - double points during super boost
+    scoreTimer += deltaTime;
+    if (scoreTimer > 60) {
+      scoreTimer = 0;
+      score += ship.superMegaUltraBoost > 0 ? 2 : 1;
+    }
+    
+    // Update score display
+    document.getElementById('score').textContent = `SCORE: ${score}`;
+    document.getElementById('high-score').textContent = `HIGH SCORE: ${highScore}`;
+    
+    // Check for collisions
+    checkCollisions();
+    
+    // Update performance stats
+    document.getElementById('asteroid-count').textContent = asteroids.length;
+  }
+
+  function drawGameObjects() {
+    // Clear canvas
+    ctx.clearRect(0, 0, W, H);
+    
+    // Draw stars
+    stars.forEach(star => star.draw());
+    
+    // Draw particles
+    particles.forEach(particle => particle.draw());
+    
+    // Draw debris
+    debris.forEach(debris => debris.draw());
+    
+    // Draw bullets
+    bullets.forEach(bullet => bullet.draw());
+    
+    if (gameState === 'death-cinematic') {
+      // Draw everything with a cinematic effect
+      ctx.save();
+      
+      // Apply camera shake and zoom
+      cinematicZoom -= 0.002;
+      cinematicZoom = Math.max(0.5, cinematicZoom);
+      
+      const shakeX = Math.random() * 10 - 5;
+      const shakeY = Math.random() * 10 - 5;
+      
+      ctx.translate(W/2, H/2);
+      ctx.scale(cinematicZoom, cinematicZoom);
+      ctx.translate(-cinematicCameraX + shakeX, -cinematicCameraY + shakeY);
+      
+      // Draw all game objects in cinematic mode
+      powerUps.forEach(powerUp => powerUp.draw());
+      asteroids.forEach(asteroid => asteroid.draw());
+      enemies.forEach(enemy => enemy.draw());
+      ship.draw();
+      
+      ctx.restore();
+      
+      return;
+    }
+    
+    if (gameState !== 'playing') return;
+    
+    // Draw power-ups
+    powerUps.forEach(powerUp => powerUp.draw());
+    
+    // Draw asteroids
+    asteroids.forEach(asteroid => asteroid.draw());
+    
+    // Draw enemies
+    enemies.forEach(enemy => enemy.draw());
+    
+    // Draw ship
+    ship.draw();
+  }
+
+  function gameLoop(timestamp) {
+    const deltaTime = timestamp - lastTime;
+    lastTime = timestamp;
+    
+    // Calculate FPS
+    frameCount++;
+    if (timestamp > lastFpsUpdate + 1000) {
+      currentFps = Math.round((frameCount * 1000) / (timestamp - lastFpsUpdate));
+      frameCount = 0;
+      lastFpsUpdate = timestamp;
+      document.getElementById('fps-counter').textContent = currentFps;
+    }
+    
+    updateGameObjects(deltaTime);
+    drawGameObjects();
+    
+    if (gameState === 'playing' || gameState === 'death-cinematic') {
+      animationId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // === EVENT LISTENERS ===
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (keys.hasOwnProperty(key)) {
+      keys[key] = true;
+    }
+    
+    // Space bar for shooting
+    if (key === ' ') {
+      keys.space = true;
+      ship.shoot();
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    if (keys.hasOwnProperty(key)) {
+      keys[key] = false;
+    }
+  });
+
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('restart-btn').addEventListener('click', startGame);
+
+  // Initialize the game
+  stars.forEach(star => star.reset());
+})();
+</script>
+</body>
+</html>
