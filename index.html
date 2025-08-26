@@ -421,6 +421,15 @@
       <div>ASTEROIDS: <span id="asteroid-count">0</span></div>
     </div>
   </div>
+
+  <!-- Dev tuning panel (hidden by default) -->
+  <div id="dev-panel" style="position:fixed;bottom:10px;left:10px;padding:8px;background:rgba(0,0,0,0.6);color:#0ff;border:1px solid #0ff;border-radius:6px;z-index:20;font-size:13px;display:none;">
+    <div style="margin-bottom:6px;">DEV PANEL — Pointer Tuning</div>
+    <label>Deadzone: <input id="dev-deadzone" type="range" min="0" max="40" value="8" /></label><br/>
+    <label>Steer: <input id="dev-steer" type="range" min="0.02" max="0.5" step="0.01" value="0.12" /></label><br/>
+    <label>Lerp: <input id="dev-lerp" type="range" min="0.02" max="0.5" step="0.01" value="0.12" /></label><br/>
+    <button id="dev-toggle">Hide</button>
+  </div>
   
   <div id="death-cinematic"></div>
   <div id="death-message">CRITICAL DAMAGE<br><span style="font-size: 1.5rem;">ESCAPE POD ACTIVATED</span></div>
@@ -493,6 +502,20 @@
   const MAX_DEBRIS = 50;
   const MAX_BULLETS = 20;
 
+  // Pointer state (mouse / touch). Initialized here so classes can reference it safely.
+  const pointer = {
+    x: 0,
+    y: 0,
+    active: false,
+    isDown: false,
+    isTouch: false
+  };
+
+  // Pointer tuning constants (adjust feel)
+  let POINTER_DEADZONE = 8;         // pixels within which the ship won't jitter
+  let POINTER_STEER_FACTOR = 0.12;  // how strongly the ship steers toward pointer
+  let POINTER_LERP = 0.12;          // smoothing factor for velocity lerp
+
   // === RESIZE ===
   function resize() {
     W = window.innerWidth;
@@ -503,6 +526,9 @@
     canvas.style.height = H + 'px';
     ctx.setTransform(1,0,0,1,0,0);
     ctx.scale(devicePixelRatio, devicePixelRatio);
+  // initialize pointer to center so pointer-based steering starts smoothly
+  pointer.x = W / 2;
+  pointer.y = H / 2;
   }
   window.addEventListener('resize', resize);
   resize();
@@ -739,10 +765,25 @@
       }
       
       // Movement input
-      if (keys.w) this.velY -= this.acceleration * gameSpeedMultiplier;
-      if (keys.s) this.velY += this.acceleration * gameSpeedMultiplier;
-      if (keys.a) this.velX -= this.acceleration * gameSpeedMultiplier;
-      if (keys.d) this.velX += this.acceleration * gameSpeedMultiplier;
+      // If pointer controls are active (mouse/touch), steer directly toward pointer
+      if (pointer && pointer.active && gameState === 'playing') {
+        // Compute a target velocity proportional to the distance to pointer
+        const deadZone = POINTER_DEADZONE;
+        const steerFactor = POINTER_STEER_FACTOR; // tune responsiveness
+  let targetVX = (pointer.x - this.x) * steerFactor;
+  let targetVY = (pointer.y - this.y) * steerFactor;
+        // If within dead zone, don't aggressively change velocity
+        if (Math.abs(pointer.x - this.x) < deadZone) targetVX = 0;
+        if (Math.abs(pointer.y - this.y) < deadZone) targetVY = 0;
+        // Smoothly move current velocity toward target velocity
+        this.velX = lerp(this.velX, targetVX, POINTER_LERP);
+        this.velY = lerp(this.velY, targetVY, POINTER_LERP);
+      } else {
+        if (keys.w) this.velY -= this.acceleration * gameSpeedMultiplier;
+        if (keys.s) this.velY += this.acceleration * gameSpeedMultiplier;
+        if (keys.a) this.velX -= this.acceleration * gameSpeedMultiplier;
+        if (keys.d) this.velX += this.acceleration * gameSpeedMultiplier;
+      }
 
       // Clamp speed and apply friction
       this.velX = lerp(this.velX, 0, this.friction);
@@ -1471,6 +1512,22 @@
   function drawGameObjects() {
     // Clear canvas
     ctx.clearRect(0, 0, W, H);
+    // Draw pointer marker for visual feedback
+    if (pointer && pointer.active) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(0,255,255,0.9)';
+      ctx.lineWidth = 2;
+      ctx.arc(pointer.x, pointer.y, 8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pointer.x - 12, pointer.y);
+      ctx.lineTo(pointer.x + 12, pointer.y);
+      ctx.moveTo(pointer.x, pointer.y - 12);
+      ctx.lineTo(pointer.x, pointer.y + 12);
+      ctx.stroke();
+      ctx.restore();
+    }
     
     // Draw stars
     stars.forEach(star => star.draw());
@@ -1547,31 +1604,190 @@
   }
 
   // === EVENT LISTENERS ===
+  // Keyboard input (existing behaviour kept)
   document.addEventListener('keydown', (e) => {
-    const key = e.key.toLowerCase();
-    if (keys.hasOwnProperty(key)) {
-      keys[key] = true;
-    }
-    
-    // Space bar for shooting
-    if (key === ' ') {
+    const k = e.key.toLowerCase();
+    if (k === 'w' || k === 'arrowup') keys.w = true;
+    if (k === 'a' || k === 'arrowleft') keys.a = true;
+    if (k === 's' || k === 'arrowdown') keys.s = true;
+    if (k === 'd' || k === 'arrowright') keys.d = true;
+    if (e.code === 'Space' || e.key === ' ') {
       keys.space = true;
-      ship.shoot();
+      if (ship && typeof ship.shoot === 'function' && shootCooldown <= 0) {
+        ship.shoot();
+      }
     }
   });
 
   document.addEventListener('keyup', (e) => {
-    const key = e.key.toLowerCase();
-    if (keys.hasOwnProperty(key)) {
-      keys[key] = false;
-    }
+    const k = e.key.toLowerCase();
+    if (k === 'w' || k === 'arrowup') keys.w = false;
+    if (k === 'a' || k === 'arrowleft') keys.a = false;
+    if (k === 's' || k === 'arrowdown') keys.s = false;
+    if (k === 'd' || k === 'arrowright') keys.d = false;
+    if (e.code === 'Space' || e.key === ' ') keys.space = false;
   });
 
+  // --- Pointer / Mouse / Touch input ---
+  // (pointer state declared earlier in globals)
+
+  // Improve pointer/touch capture on some browsers
+  canvas.style.touchAction = 'none'; // prevent default scrolling on touch
+  canvas.setAttribute('tabindex', '0'); // allow canvas to receive focus if needed
+
+  function getPointerPosFromEvent(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  function updateInputFromPointer() {
+    if (!ship || !pointer.active || gameState !== 'playing') return;
+
+    const dx = pointer.x - ship.x;
+    const dy = pointer.y - ship.y;
+    const deadZone = 8; // pixels threshold to avoid jitter
+
+    keys.a = dx < -deadZone;
+    keys.d = dx > deadZone;
+    keys.w = dy < -deadZone;
+    keys.s = dy > deadZone;
+
+    // tap/hold to shoot
+    keys.space = !!pointer.isDown;
+    if (pointer.isDown && ship && typeof ship.shoot === 'function' && shootCooldown <= 0) {
+      ship.shoot();
+    }
+  }
+
+  // Continuous updater so a static pointer keeps the ship moving toward it
+  (function inputLoop() {
+    updateInputFromPointer();
+    requestAnimationFrame(inputLoop);
+  })();
+
+  // Mouse
+  // Use Pointer Events when available to unify mouse/touch/pen
+  if (window.PointerEvent) {
+    canvas.addEventListener('pointermove', (e) => {
+    const pos = getPointerPosFromEvent(e.clientX, e.clientY);
+    pointer.x = pos.x;
+    pointer.y = pos.y;
+    pointer.active = true;
+    pointer.isTouch = e.pointerType === 'touch';
+  });
+
+    canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+    const pos = getPointerPosFromEvent(e.clientX, e.clientY);
+    pointer.x = pos.x;
+    pointer.y = pos.y;
+    pointer.active = true;
+    pointer.isDown = true;
+    pointer.isTouch = e.pointerType === 'touch';
+  });
+
+    canvas.addEventListener('pointerup', (e) => {
+    canvas.releasePointerCapture && canvas.releasePointerCapture(e.pointerId);
+    pointer.isDown = false;
+    // keep pointer.active true so ship can finish moving to location
+  });
+
+    canvas.addEventListener('pointerleave', (e) => {
+      pointer.active = false;
+    });
+  } else {
+    // Fallbacks for older browsers: mouse + touch
+    canvas.addEventListener('mousemove', (e) => {
+      const pos = getPointerPosFromEvent(e.clientX, e.clientY);
+      pointer.x = pos.x;
+      pointer.y = pos.y;
+      pointer.active = true;
+      pointer.isTouch = false;
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      const pos = getPointerPosFromEvent(e.clientX, e.clientY);
+      pointer.x = pos.x;
+      pointer.y = pos.y;
+      pointer.active = true;
+      pointer.isDown = true;
+      pointer.isTouch = false;
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      pointer.isDown = false;
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      const pos = getPointerPosFromEvent(t.clientX, t.clientY);
+      pointer.x = pos.x;
+      pointer.y = pos.y;
+      pointer.active = true;
+      pointer.isDown = true;
+      pointer.isTouch = true;
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const t = e.touches[0];
+      const pos = getPointerPosFromEvent(t.clientX, t.clientY);
+      pointer.x = pos.x;
+      pointer.y = pos.y;
+      pointer.active = true;
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      pointer.isDown = false;
+      pointer.active = false;
+    }, { passive: false });
+  }
+
+  // (Pointer events used above to handle mouse & touch in a unified way)
+
+  // Keep existing start/restart bindings
   document.getElementById('start-btn').addEventListener('click', startGame);
   document.getElementById('restart-btn').addEventListener('click', startGame);
 
   // Initialize the game
   stars.forEach(star => star.reset());
+
+  // --- Dev panel wiring ---
+  (function setupDevPanel(){
+    const panel = document.getElementById('dev-panel');
+    const btn = document.getElementById('dev-toggle');
+    const deadzoneEl = document.getElementById('dev-deadzone');
+    const steerEl = document.getElementById('dev-steer');
+    const lerpEl = document.getElementById('dev-lerp');
+
+    if(!panel) return;
+
+    // Update inputs from current values
+    deadzoneEl.value = POINTER_DEADZONE;
+    steerEl.value = POINTER_STEER_FACTOR;
+    lerpEl.value = POINTER_LERP;
+
+    deadzoneEl.addEventListener('input', (e) => { POINTER_DEADZONE = Number(e.target.value); });
+    steerEl.addEventListener('input', (e) => { POINTER_STEER_FACTOR = Number(e.target.value); });
+    lerpEl.addEventListener('input', (e) => { POINTER_LERP = Number(e.target.value); });
+
+    btn.addEventListener('click', () => {
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      btn.textContent = panel.style.display === 'none' ? 'Show' : 'Hide';
+    });
+
+    // Toggle with backtick/tilde key for convenience
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '`' || e.key === '~') {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+  })();
 })();
 </script>
 </body>
