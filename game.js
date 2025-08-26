@@ -1,9 +1,13 @@
-// This file contains the JavaScript code for the web game.
-// It includes functions to handle game logic, user interactions, and animations.
+// Archived copy of game.js
+
+// This was an earlier stub/demo file. The real game logic lives inline in index.html.
+// Kept for reference.
 
 document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     const gameArea = document.getElementById('game-area');
+
+    if (!startButton || !gameArea) return;
 
     startButton.addEventListener('click', startGame);
 
