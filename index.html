@@ -765,8 +765,10 @@
       }
       
       // Movement input
-      // If pointer controls are active (mouse/touch), steer directly toward pointer
-      if (pointer && pointer.active && gameState === 'playing') {
+  // If pointer controls are active (touch or pointer held), steer directly toward pointer
+  // Note: only use pointer steering for touch input or when the pointer is pressed (isDown).
+  // This preserves keyboard (WASD) control for desktop users who move the mouse but don't click.
+  if (pointer && pointer.active && (pointer.isTouch || pointer.isDown) && gameState === 'playing') {
         // Compute a target velocity proportional to the distance to pointer
         const deadZone = POINTER_DEADZONE;
         const steerFactor = POINTER_STEER_FACTOR; // tune responsiveness
@@ -1644,7 +1646,9 @@
   }
 
   function updateInputFromPointer() {
-    if (!ship || !pointer.active || gameState !== 'playing') return;
+    // Only update keyboard-emulation from pointer when the game is playing,
+    // the pointer is active, and either it's a touch device or the pointer is currently pressed.
+    if (!ship || gameState !== 'playing' || !pointer.active || !(pointer.isTouch || pointer.isDown)) return;
 
     const dx = pointer.x - ship.x;
     const dy = pointer.y - ship.y;
